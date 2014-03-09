@@ -4,14 +4,14 @@ import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
 
-public class SoundRecorder {
+public class RecordingService {
 
   public static final long RECORD_TIME = 5000;
   private File soundFile;
   private AudioFileFormat.Type fileType = AudioFileFormat.Type.WAVE;
   private TargetDataLine line;
 
-  public SoundRecorder(File soundFile) {
+  public RecordingService(File soundFile) {
     this.soundFile = soundFile;
     if (!soundFile.exists()) try {
       soundFile.createNewFile();
@@ -20,11 +20,11 @@ public class SoundRecorder {
     }
   }
 
-  public SoundRecorder(String path) {
+  public RecordingService(String path) {
     this(new File(path));
   }
 
-  public void start() {
+  public void startRecording() {
     try {
       AudioFormat format = getAudioFormat();
       DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
@@ -52,7 +52,7 @@ public class SoundRecorder {
         channels, true, true);
   }
 
-  public void finish() {
+  public void stopRecording() {
     line.stop();
     line.close();
     System.out.println("Finished");
