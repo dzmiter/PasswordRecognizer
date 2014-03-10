@@ -6,17 +6,9 @@ import java.awt.*;
 
 public class RecognizerFrame extends JFrame {
 
-  /**
-   * Create the frame.
-   *
-   * @throws UnsupportedLookAndFeelException
-   * @throws IllegalAccessException
-   * @throws InstantiationException
-   * @throws ClassNotFoundException
-   */
   public RecognizerFrame() throws Exception {
     setTitle("Password Recognizer");
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     setMinimumSize(new Dimension(800, 600));
     setLocationRelativeTo(null);
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -71,13 +63,74 @@ public class RecognizerFrame extends JFrame {
     gbl_rightSounds.columnWeights = new double[]{1.0, Double.MIN_VALUE};
     gbl_rightSounds.rowWeights = new double[]{1.0, Double.MIN_VALUE};
     rightSounds.setLayout(gbl_rightSounds);
-    JTable tableRight = new JTable();
+    JTable tableRight = new JTable(new Object[][]{
+        new Object[]{"1"},
+        new Object[]{"2"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"},
+        new Object[]{"3"}
+    }, new Object[]{
+        "Sounds"
+    });
     c = new GridBagConstraints();
     c.fill = GridBagConstraints.BOTH;
     c.gridx = 0;
     c.gridwidth = 2;
     c.gridy = 0;
-    rightSounds.add(tableRight, c);
+    JScrollPane rightSoundsPane = new JScrollPane(tableRight);
+    rightSounds.add(rightSoundsPane, c);
     JButton addRight = new JButton("Add");
     c = new GridBagConstraints();
     c.fill = GridBagConstraints.VERTICAL;
@@ -148,7 +201,6 @@ public class RecognizerFrame extends JFrame {
     c.gridheight = 1;
     amplitudes.add(info, c);
 
-
     c = new GridBagConstraints();
     c.insets = new Insets(0, 0, 5, 5);
     JPanel leftSounds = new JPanel();
@@ -163,13 +215,21 @@ public class RecognizerFrame extends JFrame {
     gbl_leftSounds.columnWeights = new double[]{Double.MIN_VALUE};
     gbl_leftSounds.rowWeights = new double[]{Double.MIN_VALUE};
     leftSounds.setLayout(gbl_leftSounds);
-    JTable tableLeft = new JTable();
+    JTable tableLeft = new JTable(new Object[][]{
+        new Object[]{"1"},
+        new Object[]{"2"},
+        new Object[]{"3"}
+    }, new Object[]{
+        "Sounds"
+    });
     c = new GridBagConstraints();
     c.fill = GridBagConstraints.BOTH;
     c.gridx = 0;
     c.gridwidth = 2;
     c.gridy = 0;
-    leftSounds.add(tableLeft, c);
+
+    JScrollPane leftSoundsPane = new JScrollPane(tableLeft);
+    leftSounds.add(leftSoundsPane, c);
     JButton addLeft = new JButton("Add");
     c = new GridBagConstraints();
     c.fill = GridBagConstraints.VERTICAL;
