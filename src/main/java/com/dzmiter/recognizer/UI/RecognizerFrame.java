@@ -2,14 +2,22 @@ package com.dzmiter.recognizer.UI;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RecognizerFrame extends JFrame {
 
+  private List<JTable> tables;
+
   public RecognizerFrame() throws Exception {
+    tables = new ArrayList<JTable>();
     setTitle("Password Recognizer");
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    setMinimumSize(new Dimension(800, 600));
+    setMinimumSize(new Dimension(1000, 600));
     setLocationRelativeTo(null);
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
@@ -74,6 +82,19 @@ public class RecognizerFrame extends JFrame {
     contentPane.add(panel, gbc_panel);
   }
 
+  public static void main(String[] args) {
+    EventQueue.invokeLater(new Runnable() {
+      public void run() {
+        try {
+          RecognizerFrame frame = new RecognizerFrame();
+          frame.setVisible(true);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    });
+  }
+
   private JPanel buildMiddlePanel() {
     JPanel amplitudes = new JPanel();
     GridBagLayout gbl_amplitudes = new GridBagLayout();
@@ -130,6 +151,7 @@ public class RecognizerFrame extends JFrame {
     c.gridx = 0;
     c.gridy = 2;
     c.weightx = 1;
+    c.weighty = 0.1;
     amplitudes.add(playStop, c);
 
     JButton compare = new JButton("Compare");
@@ -145,77 +167,32 @@ public class RecognizerFrame extends JFrame {
     return amplitudes;
   }
 
-
   private JPanel buildSoundTablePanel() {
-    JPanel rightSounds = new JPanel();
+    final JPanel rightSounds = new JPanel();
     GridBagLayout gbl_rightSounds = new GridBagLayout();
     gbl_rightSounds.columnWeights = new double[]{Double.MIN_VALUE};
     gbl_rightSounds.rowWeights = new double[]{Double.MIN_VALUE};
     rightSounds.setLayout(gbl_rightSounds);
 
-    Object[][] data = new Object[][]{
-        new Object[]{"1"},
-        new Object[]{"2"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"},
-        new Object[]{"3"}
+    DefaultTableModel dm = new DefaultTableModel() {
+      @Override
+      public boolean isCellEditable(int row, int column) {
+        return false;
+      }
     };
+    dm.setDataVector(new Object[][]{{"1"},
+        {"2"}}, new Object[]{"Sound"});
 
-    JTable tableRight = new JTable(data, new Object[]{
-        "Sounds"
+    final JTable tableRight = new JTable(dm);
+    tables.add(tableRight);
+    tableRight.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+      public void valueChanged(ListSelectionEvent event) {
+        for (JTable table : tables) {
+          table.clearSelection();
+        }
+      }
     });
+    tableRight.setRowHeight(30);
     tableRight.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     GridBagConstraints c = new GridBagConstraints();
     c.fill = GridBagConstraints.BOTH;
@@ -249,20 +226,6 @@ public class RecognizerFrame extends JFrame {
     c.weightx = 1;
     rightSounds.add(btnDelete, c);
     return rightSounds;
-  }
-
-
-  public static void main(String[] args) {
-    EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          RecognizerFrame frame = new RecognizerFrame();
-          frame.setVisible(true);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-    });
   }
 
 }
