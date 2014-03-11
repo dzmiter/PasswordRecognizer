@@ -41,29 +41,119 @@ public class RecognizerFrame extends JFrame {
     mnHelp.add(mntmAbout);
 
     JPanel contentPane = new JPanel();
-    contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+    contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
     setContentPane(contentPane);
-    GridBagLayout gbl_contentPane = new GridBagLayout();
-    gbl_contentPane.columnWidths = new int[]{0, 0};
-    gbl_contentPane.rowHeights = new int[]{0, 0};
-    contentPane.setLayout(gbl_contentPane);
+    contentPane.setLayout(new GridBagLayout());
 
     GridBagConstraints c = new GridBagConstraints();
-    c.insets = new Insets(0, 0, 5, 5);
     c.weighty = 1.0;
-    JPanel rightSounds = new JPanel();
     c.fill = GridBagConstraints.BOTH;
-    c.weightx = 0.3;
+    c.weightx = 0.1;
     c.gridx = 0;
     c.gridy = 0;
+    JPanel rightSounds = buildSoundTablePanel();
     contentPane.add(rightSounds, c);
+
+    c = new GridBagConstraints();
+    c.weighty = 1.0;
+
+    c.fill = GridBagConstraints.BOTH;
+    c.weightx = 0.8;
+    c.gridx = 1;
+    c.gridy = 0;
+    JPanel amplitudes = buildMiddlePanel();
+    contentPane.add(amplitudes, c);
+
+    JPanel panel = buildSoundTablePanel();
+    GridBagConstraints gbc_panel = new GridBagConstraints();
+    gbc_panel.weightx = 0.1;
+    gbc_panel.weighty = 1.0;
+    gbc_panel.fill = GridBagConstraints.BOTH;
+    gbc_panel.gridx = 2;
+    gbc_panel.gridy = 0;
+    contentPane.add(panel, gbc_panel);
+  }
+
+  private JPanel buildMiddlePanel() {
+    JPanel amplitudes = new JPanel();
+    GridBagLayout gbl_amplitudes = new GridBagLayout();
+    amplitudes.setLayout(gbl_amplitudes);
+
+    //TODO: will be replaced
+    JPanel equalizer = new JPanel();
+    GridBagConstraints c = new GridBagConstraints();
+    c.fill = GridBagConstraints.HORIZONTAL;
+    c.anchor = GridBagConstraints.NORTH;
+    c.gridx = 0;
+    c.gridy = 0;
+    c.gridwidth = 2;
+    c.weightx = 1;
+    c.weighty = 0.5;
+    amplitudes.add(equalizer, c);
+
+    JPanel htmlPanel = new JPanel();
+    htmlPanel.setBorder(BorderFactory.createTitledBorder("HTML"));
+
+    String text = "<html><h2>What is Google Labs?</h2>" +
+        "<font face=’verdana’ size = 2>" +
+        " Google Labs is a playground <br>" +
+        " where our more adventurous users can play around with <br>" +
+        " prototypes of some of our wild and crazy ideas and <br>" +
+        " offer feedback directly to the engineers who developed<br>" +
+        " them. Please note that Labs is the first phase in <br>" +
+        " a lengthy product development process and none of this <br>" +
+        " stuff is guaranteed to make it onto Google.com. <br>" +
+        " While some of our crazy ideas might grow into the <br>" +
+        " next Gmail or iGoogle, others might turn out to be, <br>" +
+        " well, just plain crazy.</html>";
+
+    Font font = new Font(null, Font.PLAIN, 10);
+
+    JLabel htmlLabel = new JLabel();
+    htmlLabel.setText(text);
+    htmlLabel.setFont(font);
+    htmlPanel.add(htmlLabel);
+    c = new GridBagConstraints();
+    c.fill = GridBagConstraints.HORIZONTAL;
+    c.anchor = GridBagConstraints.NORTH;
+    c.gridx = 0;
+    c.gridy = 1;
+    c.gridwidth = 2;
+    c.weightx = 1;
+    c.weighty = 0.4;
+    amplitudes.add(htmlPanel, c);
+
+    JButton playStop = new JButton("Play / Stop");
+    c = new GridBagConstraints();
+    c.fill = GridBagConstraints.CENTER;
+    c.anchor = GridBagConstraints.SOUTH;
+    c.gridx = 0;
+    c.gridy = 2;
+    c.weightx = 1;
+    amplitudes.add(playStop, c);
+
+    JButton compare = new JButton("Compare");
+    c = new GridBagConstraints();
+    c.fill = GridBagConstraints.CENTER;
+    c.anchor = GridBagConstraints.SOUTH;
+    c.gridx = 1;
+    c.gridy = 2;
+    c.weightx = 1;
+    c.weighty = 0.1;
+    amplitudes.add(compare, c);
+
+    return amplitudes;
+  }
+
+
+  private JPanel buildSoundTablePanel() {
+    JPanel rightSounds = new JPanel();
     GridBagLayout gbl_rightSounds = new GridBagLayout();
-    gbl_rightSounds.columnWidths = new int[]{0, 0};
-    gbl_rightSounds.rowHeights = new int[]{0, 0};
-    gbl_rightSounds.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-    gbl_rightSounds.rowWeights = new double[]{1.0, Double.MIN_VALUE};
+    gbl_rightSounds.columnWeights = new double[]{Double.MIN_VALUE};
+    gbl_rightSounds.rowWeights = new double[]{Double.MIN_VALUE};
     rightSounds.setLayout(gbl_rightSounds);
-    JTable tableRight = new JTable(new Object[][]{
+
+    Object[][] data = new Object[][]{
         new Object[]{"1"},
         new Object[]{"2"},
         new Object[]{"3"},
@@ -121,134 +211,47 @@ public class RecognizerFrame extends JFrame {
         new Object[]{"3"},
         new Object[]{"3"},
         new Object[]{"3"}
-    }, new Object[]{
+    };
+
+    JTable tableRight = new JTable(data, new Object[]{
         "Sounds"
     });
-    c = new GridBagConstraints();
+    tableRight.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    GridBagConstraints c = new GridBagConstraints();
     c.fill = GridBagConstraints.BOTH;
+    c.anchor = GridBagConstraints.NORTH;
     c.gridx = 0;
-    c.gridwidth = 2;
+    c.gridwidth = 3;
     c.gridy = 0;
+    c.weightx = 1;
     JScrollPane rightSoundsPane = new JScrollPane(tableRight);
     rightSounds.add(rightSoundsPane, c);
     JButton addRight = new JButton("Add");
     c = new GridBagConstraints();
-    c.fill = GridBagConstraints.VERTICAL;
+    c.anchor = GridBagConstraints.SOUTH;
     c.gridx = 0;
     c.gridy = 1;
     c.weightx = 1;
     rightSounds.add(addRight, c);
     JButton recordRight = new JButton("Record");
     c = new GridBagConstraints();
-    c.fill = GridBagConstraints.VERTICAL;
-    c.weightx = 1;
+    c.anchor = GridBagConstraints.SOUTH;
     c.gridx = 1;
     c.gridy = 1;
+    c.weightx = 1;
     rightSounds.add(recordRight, c);
 
+    JButton btnDelete = new JButton("Delete");
     c = new GridBagConstraints();
-    JPanel amplitudes = new JPanel();
-    c.fill = GridBagConstraints.BOTH;
-    c.weightx = 1;
+    c.anchor = GridBagConstraints.SOUTH;
     c.gridx = 2;
-    c.gridy = 0;
-    contentPane.add(amplitudes, c);
-    GridBagLayout gbl_amplitudes = new GridBagLayout();
-    gbl_amplitudes.columnWidths = new int[]{0};
-    gbl_amplitudes.rowHeights = new int[]{0};
-    gbl_amplitudes.columnWeights = new double[]{Double.MIN_VALUE};
-    gbl_amplitudes.rowWeights = new double[]{Double.MIN_VALUE};
-    amplitudes.setLayout(gbl_amplitudes);
-
-    //TODO: will be replaced
-    JPanel equalizer = new JPanel();
-    c = new GridBagConstraints();
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.anchor = GridBagConstraints.NORTH;
-    c.gridx = 0;
-    c.gridy = 0;
-    c.gridwidth = 2;
-    c.gridheight = 1;
-    amplitudes.add(equalizer, c);
-
-    JButton playStop = new JButton("Play / Stop");
-    c = new GridBagConstraints();
-    c.fill = GridBagConstraints.CENTER;
-    c.gridx = 0;
-    c.gridy = 2;
-    c.weightx = 1;
-    c.gridheight = 1;
-    amplitudes.add(playStop, c);
-
-    JButton compare = new JButton("Compare");
-    c = new GridBagConstraints();
-    c.fill = GridBagConstraints.CENTER;
-    c.gridx = 1;
-    c.gridy = 2;
-    c.weightx = 1;
-    c.gridheight = 1;
-    amplitudes.add(compare, c);
-
-    JTextArea info = new JTextArea();
-    info.setEditable(false);
-    info.setText("TEXT");
-    c = new GridBagConstraints();
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridx = 0;
     c.gridy = 1;
     c.weightx = 1;
-    c.gridwidth = 2;
-    c.gridheight = 1;
-    amplitudes.add(info, c);
-
-    c = new GridBagConstraints();
-    c.insets = new Insets(0, 0, 5, 5);
-    JPanel leftSounds = new JPanel();
-    c.fill = GridBagConstraints.BOTH;
-    c.weightx = 0.3;
-    c.gridx = 3;
-    c.gridy = 0;
-    contentPane.add(leftSounds, c);
-    GridBagLayout gbl_leftSounds = new GridBagLayout();
-    gbl_leftSounds.columnWidths = new int[]{0};
-    gbl_leftSounds.rowHeights = new int[]{0};
-    gbl_leftSounds.columnWeights = new double[]{Double.MIN_VALUE};
-    gbl_leftSounds.rowWeights = new double[]{Double.MIN_VALUE};
-    leftSounds.setLayout(gbl_leftSounds);
-    JTable tableLeft = new JTable(new Object[][]{
-        new Object[]{"1"},
-        new Object[]{"2"},
-        new Object[]{"3"}
-    }, new Object[]{
-        "Sounds"
-    });
-    c = new GridBagConstraints();
-    c.fill = GridBagConstraints.BOTH;
-    c.gridx = 0;
-    c.gridwidth = 2;
-    c.gridy = 0;
-
-    JScrollPane leftSoundsPane = new JScrollPane(tableLeft);
-    leftSounds.add(leftSoundsPane, c);
-    JButton addLeft = new JButton("Add");
-    c = new GridBagConstraints();
-    c.fill = GridBagConstraints.VERTICAL;
-    c.gridx = 0;
-    c.gridy = 1;
-    c.weightx = 1;
-    leftSounds.add(addLeft, c);
-    JButton recordLeft = new JButton("Record");
-    c = new GridBagConstraints();
-    c.fill = GridBagConstraints.VERTICAL;
-    c.weightx = 1;
-    c.gridx = 1;
-    c.gridy = 1;
-    leftSounds.add(recordLeft, c);
+    rightSounds.add(btnDelete, c);
+    return rightSounds;
   }
 
-  /**
-   * Launch the application.
-   */
+
   public static void main(String[] args) {
     EventQueue.invokeLater(new Runnable() {
       public void run() {
