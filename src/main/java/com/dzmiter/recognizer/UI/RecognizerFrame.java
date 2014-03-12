@@ -6,6 +6,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,9 +19,14 @@ public class RecognizerFrame extends JFrame {
     soundTables = new ArrayList<JPanel>();
     setTitle("Password Recognizer");
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    setMinimumSize(new Dimension(1000, 600));
+    setMinimumSize(new Dimension(800, 600));
     setLocationRelativeTo(null);
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+
+    final JPanel contentPane = new JPanel();
+    contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
+    setContentPane(contentPane);
+    contentPane.setLayout(new GridBagLayout());
 
     JMenuBar menuBar = new JMenuBar();
     setJMenuBar(menuBar);
@@ -37,21 +44,34 @@ public class RecognizerFrame extends JFrame {
     mnFile.add(mntmSearch);
 
     JMenuItem mntmExit = new JMenuItem("Exit");
+    mntmExit.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        System.exit(0);
+      }
+    });
     mnFile.add(mntmExit);
 
     JMenu mnHelp = new JMenu("Help");
     menuBar.add(mnHelp);
 
     JMenuItem mntmHelp = new JMenuItem("Help");
+    mntmHelp.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        JOptionPane.showMessageDialog(contentPane, "Help text!", "Help", JOptionPane.INFORMATION_MESSAGE);
+      }
+    });
     mnHelp.add(mntmHelp);
 
     JMenuItem mntmAbout = new JMenuItem("About");
+    mntmAbout.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        JOptionPane.showMessageDialog(contentPane, "This is password recognizer", "About", JOptionPane.INFORMATION_MESSAGE);
+      }
+    });
     mnHelp.add(mntmAbout);
-
-    JPanel contentPane = new JPanel();
-    contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
-    setContentPane(contentPane);
-    contentPane.setLayout(new GridBagLayout());
 
     GridBagConstraints c = new GridBagConstraints();
     c.weighty = 1.0;
