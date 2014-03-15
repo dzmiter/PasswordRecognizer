@@ -77,8 +77,10 @@ class SamplingGraph extends JPanel {
     }
   }
 
-  public void createAudioInputStream(File file) {
+  public void drawSamplingGraph(File file) {
     if (file == null || !file.isFile()) {
+      lines.clear();
+      repaint();
       return;
     }
     try {

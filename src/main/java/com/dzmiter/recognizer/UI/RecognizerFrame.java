@@ -2,6 +2,7 @@ package com.dzmiter.recognizer.UI;
 
 import com.dzmiter.recognizer.domain.CustomProperties;
 import com.dzmiter.recognizer.domain.SetWithGet;
+import com.dzmiter.recognizer.domain.SoundFile;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -21,8 +22,9 @@ import java.util.List;
 public class RecognizerFrame extends JFrame {
 
   private List<JTable> soundTables;
-  private File selectedSoundFile;
   private SamplingGraph samplingGraph;
+  private SoundFile selectedSoundFile;
+  private JButton playStopButton;
 
   public RecognizerFrame() throws Exception {
     soundTables = new ArrayList<JTable>();
@@ -115,7 +117,7 @@ public class RecognizerFrame extends JFrame {
       @Override
       public void componentResized(ComponentEvent e) {
         super.componentResized(e);
-        samplingGraph.createAudioInputStream(selectedSoundFile);
+        samplingGraph.drawSamplingGraph(selectedSoundFile);
       }
     });
 
@@ -142,7 +144,18 @@ public class RecognizerFrame extends JFrame {
     samplingGraph = new SamplingGraph();
     panel.add(BorderLayout.CENTER, samplingGraph);
     JPanel buttons = new JPanel();
-    JButton playStopButton = new JButton("Play / Stop");
+    playStopButton = new JButton("Play / Stop");
+    playStopButton.setEnabled(false);
+    playStopButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        try {
+          selectedSoundFile.togglePlayStop();
+        } catch (Exception e1) {
+          e1.printStackTrace();
+        }
+      }
+    });
     buttons.add(BorderLayout.SOUTH, playStopButton);
     JButton compareButton = new JButton("Compare");
     buttons.add(compareButton);
@@ -154,21 +167,26 @@ public class RecognizerFrame extends JFrame {
     return new ListSelectionListener() {
       @Override
       public void valueChanged(ListSelectionEvent event) {
-        ListSelectionModel current = (ListSelectionModel) event.getSource();
-        if (event.getValueIsAdjusting()) {
-          List<JTable> tables = getSoundTablesExceptCurrentBy(current);
-          for (JTable table : tables) {
-            table.clearSelection();
-          }
-        } else {
-          SoundTable currentPane = getSoundTableBy(current);
-          SetWithGet<File> sounds = currentPane.getSounds();
-          int index = ((ListSelectionModel) event.getSource()).getMinSelectionIndex();
-          if (index >= 0) {
-            selectedSoundFile = sounds.get(index);
-            samplingGraph.createAudioInputStream(selectedSoundFile);
-          }
+        if (!event.getValueIsAdjusting()) {
+          return;
         }
+        ListSelectionModel current = (ListSelectionModel) event.getSource();
+        List<JTable> tables = getSoundTablesExceptCurrentBy(current);
+        for (JTable table : tables) {
+          table.clearSelection();
+        }
+        int index = current.getMinSelectionIndex();
+        playStopButton.setEnabled(index >= 0);
+        SoundTable currentPane = getSoundTableBy(current);
+        SetWithGet<File> sounds = currentPane.getSounds();
+        if (selectedSoundFile != null) selectedSoundFile.stop();
+        if (index >= 0) {
+          File currentFile = sounds.get(index);
+          selectedSoundFile = new SoundFile(currentFile);
+        } else {
+          selectedSoundFile = null;
+        }
+        samplingGraph.drawSamplingGraph(selectedSoundFile);
       }
     };
   }
