@@ -1,6 +1,5 @@
 package com.dzmiter.recognizer.UI;
 
-import com.dzmiter.recognizer.domain.CustomProperties;
 import com.dzmiter.recognizer.domain.LinkedHashSetWithGet;
 import com.dzmiter.recognizer.domain.SetWithGet;
 
@@ -18,7 +17,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -33,17 +33,14 @@ class SoundTable extends JPanel implements ActionListener {
   private SetWithGet<File> sounds;
   private JTable table;
   private JFileChooser fileChooser;
-  private CustomProperties soundProperties;
 
-  public SoundTable(ListSelectionListener selectionListener) {
-    fileChooser = new JFileChooser(System.getProperty("user.dir"));
-    fileChooser.setMultiSelectionEnabled(true);
+  public SoundTable(ListSelectionListener selectionListener, JFileChooser fileChooser) {
+    this.fileChooser = fileChooser;
     sounds = new LinkedHashSetWithGet<File>();
-    soundProperties = new CustomProperties("sound.properties");
     setLayout(new BorderLayout());
+    setPreferredSize(new Dimension(250, 400));
 
     final String[] names = {"#", "Name"};
-
     dataModel = new AbstractTableModel() {
       public int getColumnCount() {
         return names.length;
@@ -124,7 +121,7 @@ class SoundTable extends JPanel implements ActionListener {
         int returnVal = fileChooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
           File[] files = fileChooser.getSelectedFiles();
-          sounds.addAll(checkAndGetAudioFiles(files));
+          sounds.addAll(Arrays.asList(files));
           tableChanged();
         }
       } else if (text.equals("Record now")) {
@@ -144,19 +141,7 @@ class SoundTable extends JPanel implements ActionListener {
     }
   }
 
-  private Set<File> checkAndGetAudioFiles(File[] files) {
-    List<String> allowedExtensions = Arrays.asList(soundProperties.getProperty("allowedFormats").split(","));
-    Set<File> result = new LinkedHashSet<File>();
-    for (File file : files) {
-      String ext = file.getName().substring(file.getName().lastIndexOf('.') + 1);
-      if (allowedExtensions.contains(ext)) {
-        result.add(file);
-      }
-    }
-    return result;
-  }
-
-  public Set<File> getSounds() {
+  public SetWithGet<File> getSounds() {
     return sounds;
   }
 

@@ -1,31 +1,41 @@
 package com.dzmiter.recognizer.UI;
 
+import com.dzmiter.recognizer.domain.CustomProperties;
+import com.dzmiter.recognizer.domain.SetWithGet;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class RecognizerFrame extends JFrame {
 
   private List<JTable> soundTables;
+  private File selectedSoundFile;
+  private SamplingGraph samplingGraph;
 
   public RecognizerFrame() throws Exception {
     soundTables = new ArrayList<JTable>();
     setTitle("Password Recognizer");
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    setMinimumSize(new Dimension(800, 600));
+    setMinimumSize(new Dimension(1000, 600));
     setLocationRelativeTo(null);
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
     final JPanel contentPane = new JPanel();
     contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
     setContentPane(contentPane);
-    contentPane.setLayout(new GridBagLayout());
+    contentPane.setLayout(new BorderLayout());
 
     JMenuBar menuBar = new JMenuBar();
     setJMenuBar(menuBar);
@@ -72,33 +82,42 @@ public class RecognizerFrame extends JFrame {
     });
     mnHelp.add(mntmAbout);
 
-    GridBagConstraints c = new GridBagConstraints();
-    c.weighty = 1.0;
-    c.fill = GridBagConstraints.BOTH;
-    c.weightx = 0.2;
-    c.gridx = 0;
-    c.gridy = 0;
-    SoundTable rightSounds = new SoundTable(getListSelectionListener());
-    contentPane.add(rightSounds, c);
+    final CustomProperties soundProperties = new CustomProperties("sound.properties");
+    JFileChooser fileChooser = new JFileChooser(System.getProperty("user.dir"));
+    fileChooser.setMultiSelectionEnabled(true);
+    fileChooser.setFileFilter(new FileFilter() {
+      @Override
+      public boolean accept(File f) {
+        if (f.isDirectory()) {
+          return true;
+        }
+        String name = f.getName();
+        List<String> allowedExtensions = Arrays.asList(soundProperties.getProperty("allowedFormats").split(","));
+        return allowedExtensions.contains(name.substring(name.lastIndexOf('.') + 1));
+      }
 
-    c = new GridBagConstraints();
-    c.weighty = 1.0;
+      @Override
+      public String getDescription() {
+        return soundProperties.getProperty("allowedFormats");
+      }
+    });
 
-    c.fill = GridBagConstraints.BOTH;
-    c.weightx = 0.6;
-    c.gridx = 1;
-    c.gridy = 0;
+    SoundTable leftSounds = new SoundTable(getListSelectionListener(), fileChooser);
+    contentPane.add(BorderLayout.WEST, leftSounds);
+
     JPanel amplitudes = buildMiddlePanel();
-    contentPane.add(amplitudes, c);
+    contentPane.add(BorderLayout.CENTER, amplitudes);
 
-    SoundTable leftSounds = new SoundTable(getListSelectionListener());
-    c = new GridBagConstraints();
-    c.weightx = 0.2;
-    c.weighty = 1.0;
-    c.fill = GridBagConstraints.BOTH;
-    c.gridx = 2;
-    c.gridy = 0;
-    contentPane.add(leftSounds, c);
+    SoundTable rightSounds = new SoundTable(getListSelectionListener(), fileChooser);
+    contentPane.add(BorderLayout.EAST, rightSounds);
+
+    addComponentListener(new ComponentAdapter() {
+      @Override
+      public void componentResized(ComponentEvent e) {
+        super.componentResized(e);
+        samplingGraph.createAudioInputStream(selectedSoundFile);
+      }
+    });
 
     soundTables.add(leftSounds.getSoundTable());
     soundTables.add(rightSounds.getSoundTable());
@@ -118,88 +137,49 @@ public class RecognizerFrame extends JFrame {
   }
 
   private JPanel buildMiddlePanel() {
-    JPanel amplitudes = new JPanel();
-    amplitudes.setLayout(new GridBagLayout());
-
-    //TODO: will be replaced
-    JPanel equalizer = new JPanel();
-    GridBagConstraints c = new GridBagConstraints();
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.anchor = GridBagConstraints.NORTH;
-    c.gridx = 0;
-    c.gridy = 0;
-    c.gridwidth = 2;
-    c.weightx = 1;
-    c.weighty = 0.5;
-    amplitudes.add(equalizer, c);
-
-    JPanel htmlPanel = new JPanel();
-    htmlPanel.setBorder(BorderFactory.createTitledBorder("HTML"));
-
-    String text = "<html><h2>What is Google Labs?</h2>" +
-        "<font face=’verdana’ size = 2>" +
-        " Google Labs is a playground <br>" +
-        " where our more adventurous users can play around with <br>" +
-        " prototypes of some of our wild and crazy ideas and <br>" +
-        " offer feedback directly to the engineers who developed<br>" +
-        " them. Please note that Labs is the first phase in <br>" +
-        " a lengthy product development process and none of this <br>" +
-        " stuff is guaranteed to make it onto Google.com. <br>" +
-        " While some of our crazy ideas might grow into the <br>" +
-        " next Gmail or iGoogle, others might turn out to be, <br>" +
-        " well, just plain crazy.</html>";
-
-    Font font = new Font(null, Font.PLAIN, 10);
-
-    JLabel htmlLabel = new JLabel();
-    htmlLabel.setText(text);
-    htmlLabel.setFont(font);
-    htmlPanel.add(htmlLabel);
-    c = new GridBagConstraints();
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.anchor = GridBagConstraints.NORTH;
-    c.gridx = 0;
-    c.gridy = 1;
-    c.gridwidth = 2;
-    c.weightx = 1;
-    c.weighty = 0.4;
-    amplitudes.add(htmlPanel, c);
-
+    JPanel panel = new JPanel();
+    panel.setLayout(new BorderLayout());
+    samplingGraph = new SamplingGraph();
+    panel.add(BorderLayout.CENTER, samplingGraph);
+    JPanel buttons = new JPanel();
     JButton playStopButton = new JButton("Play / Stop");
-    c = new GridBagConstraints();
-    c.fill = GridBagConstraints.CENTER;
-    c.anchor = GridBagConstraints.SOUTH;
-    c.gridx = 0;
-    c.gridy = 2;
-    c.weightx = 1;
-    c.weighty = 0.1;
-    amplitudes.add(playStopButton, c);
-
+    buttons.add(BorderLayout.SOUTH, playStopButton);
     JButton compareButton = new JButton("Compare");
-    c = new GridBagConstraints();
-    c.fill = GridBagConstraints.CENTER;
-    c.anchor = GridBagConstraints.SOUTH;
-    c.gridx = 1;
-    c.gridy = 2;
-    c.weightx = 1;
-    c.weighty = 0.1;
-    amplitudes.add(compareButton, c);
-
-    return amplitudes;
+    buttons.add(compareButton);
+    panel.add(BorderLayout.SOUTH, buttons);
+    return panel;
   }
 
   private ListSelectionListener getListSelectionListener() {
     return new ListSelectionListener() {
       @Override
       public void valueChanged(ListSelectionEvent event) {
-        if (!event.getValueIsAdjusting()) return;
         ListSelectionModel current = (ListSelectionModel) event.getSource();
-        List<JTable> tables = getSoundTablesExceptCurrentBy(current);
-        for (JTable table : tables) {
-          table.clearSelection();
+        if (event.getValueIsAdjusting()) {
+          List<JTable> tables = getSoundTablesExceptCurrentBy(current);
+          for (JTable table : tables) {
+            table.clearSelection();
+          }
+        } else {
+          SoundTable currentPane = getSoundTableBy(current);
+          SetWithGet<File> sounds = currentPane.getSounds();
+          int index = ((ListSelectionModel) event.getSource()).getMinSelectionIndex();
+          if (index >= 0) {
+            selectedSoundFile = sounds.get(index);
+            samplingGraph.createAudioInputStream(selectedSoundFile);
+          }
         }
       }
     };
+  }
+
+  private SoundTable getSoundTableBy(ListSelectionModel currentModel) {
+    for (JTable table : this.soundTables) {
+      if (table.getSelectionModel().equals(currentModel)) {
+        return (SoundTable) table.getParent().getParent().getParent();
+      }
+    }
+    throw new RuntimeException("Not found!");
   }
 
   private List<JTable> getSoundTablesExceptCurrentBy(ListSelectionModel currentModel) {
