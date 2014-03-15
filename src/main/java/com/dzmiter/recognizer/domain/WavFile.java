@@ -1,4 +1,4 @@
-package com.dzmiter.recognizer.service;// Wav file IO class
+package com.dzmiter.recognizer.domain;// Wav file IO class
 // A.Greensted
 // http://www.labbookpages.co.uk
 

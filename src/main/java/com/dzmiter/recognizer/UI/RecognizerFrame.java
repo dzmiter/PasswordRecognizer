@@ -4,7 +4,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,10 +12,10 @@ import java.util.List;
 
 public class RecognizerFrame extends JFrame {
 
-  private List<JPanel> soundTables;
+  private List<JTable> soundTables;
 
   public RecognizerFrame() throws Exception {
-    soundTables = new ArrayList<JPanel>();
+    soundTables = new ArrayList<JTable>();
     setTitle("Password Recognizer");
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     setMinimumSize(new Dimension(800, 600));
@@ -76,33 +75,33 @@ public class RecognizerFrame extends JFrame {
     GridBagConstraints c = new GridBagConstraints();
     c.weighty = 1.0;
     c.fill = GridBagConstraints.BOTH;
-    c.weightx = 0.1;
+    c.weightx = 0.2;
     c.gridx = 0;
     c.gridy = 0;
-    JPanel rightSounds = buildSoundTablePanel();
+    SoundTable rightSounds = new SoundTable(getListSelectionListener());
     contentPane.add(rightSounds, c);
 
     c = new GridBagConstraints();
     c.weighty = 1.0;
 
     c.fill = GridBagConstraints.BOTH;
-    c.weightx = 0.8;
+    c.weightx = 0.6;
     c.gridx = 1;
     c.gridy = 0;
     JPanel amplitudes = buildMiddlePanel();
     contentPane.add(amplitudes, c);
 
-    JPanel leftSounds = buildSoundTablePanel();
+    SoundTable leftSounds = new SoundTable(getListSelectionListener());
     c = new GridBagConstraints();
-    c.weightx = 0.1;
+    c.weightx = 0.2;
     c.weighty = 1.0;
     c.fill = GridBagConstraints.BOTH;
     c.gridx = 2;
     c.gridy = 0;
     contentPane.add(leftSounds, c);
 
-    soundTables.add(leftSounds);
-    soundTables.add(rightSounds);
+    soundTables.add(leftSounds.getSoundTable());
+    soundTables.add(rightSounds.getSoundTable());
   }
 
   public static void main(String[] args) {
@@ -189,95 +188,27 @@ public class RecognizerFrame extends JFrame {
     return amplitudes;
   }
 
-  private JPanel buildSoundTablePanel() {
-
-    final JPanel soundTable = new JPanel();
-    GridBagLayout soundTableLayout = new GridBagLayout();
-    soundTableLayout.columnWeights = new double[]{Double.MIN_VALUE};
-    soundTableLayout.rowWeights = new double[]{Double.MIN_VALUE};
-    soundTable.setLayout(soundTableLayout);
-    DefaultTableModel dm = new DefaultTableModel() {
+  private ListSelectionListener getListSelectionListener() {
+    return new ListSelectionListener() {
       @Override
-      public boolean isCellEditable(int row, int column) {
-        return false;
-      }
-    };
-    dm.setDataVector(new Object[][]{{"1"},
-        {"2"}, {"3"}}, new Object[]{"Records"});
-
-
-    final JButton deleteButton = new JButton("Delete");
-    deleteButton.setName("DeleteButton");
-    deleteButton.setEnabled(false);
-    GridBagConstraints c = new GridBagConstraints();
-    c.anchor = GridBagConstraints.SOUTH;
-    c.gridx = 2;
-    c.gridy = 1;
-    c.weightx = 1;
-    soundTable.add(deleteButton, c);
-
-    final JTable contentTable = new JTable(dm);
-    contentTable.setName("ContentTable");
-    contentTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent event) {
         if (!event.getValueIsAdjusting()) return;
-        List<JPanel> panels = getSoundPanelsExceptCurrent(soundTable);
-        deleteButton.setEnabled(true);
-        for (JPanel panel : panels) {
-          Component[] components = panel.getComponents();
-          for (Component component : components) {
-            if ("ContentTableScroll".equals(component.getName())) {
-              JScrollPane scrollPane = (JScrollPane) component;
-              JTable table = (JTable) scrollPane.getViewport().getView();
-              table.clearSelection();
-            }
-            if ("DeleteButton".equals(component.getName())) {
-              component.setEnabled(false);
-            }
-          }
+        ListSelectionModel current = (ListSelectionModel) event.getSource();
+        List<JTable> tables = getSoundTablesExceptCurrentBy(current);
+        for (JTable table : tables) {
+          table.clearSelection();
         }
       }
-    });
-    contentTable.setRowHeight(30);
-    contentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    c = new GridBagConstraints();
-    c.fill = GridBagConstraints.BOTH;
-    c.anchor = GridBagConstraints.NORTH;
-    c.gridx = 0;
-    c.gridwidth = 3;
-    c.gridy = 0;
-    c.weightx = 1;
-    JScrollPane scrollPane = new JScrollPane(contentTable);
-    scrollPane.setName("ContentTableScroll");
-    soundTable.add(scrollPane, c);
-
-    JButton addButton = new JButton("Add");
-    c = new GridBagConstraints();
-    c.anchor = GridBagConstraints.SOUTH;
-    c.gridx = 0;
-    c.gridy = 1;
-    c.weightx = 1;
-    soundTable.add(addButton, c);
-
-    JButton recordButton = new JButton("Record");
-    c = new GridBagConstraints();
-    c.anchor = GridBagConstraints.SOUTH;
-    c.gridx = 1;
-    c.gridy = 1;
-    c.weightx = 1;
-    soundTable.add(recordButton, c);
-
-    return soundTable;
+    };
   }
 
-  private List<JPanel> getSoundPanelsExceptCurrent(JPanel currentPanel) {
-    List<JPanel> soundTables = new ArrayList<JPanel>();
-    for (JPanel panel : this.soundTables) {
-      if (!panel.equals(currentPanel)) {
-        soundTables.add(panel);
+  private List<JTable> getSoundTablesExceptCurrentBy(ListSelectionModel currentModel) {
+    List<JTable> soundTables = new ArrayList<JTable>();
+    for (JTable table : this.soundTables) {
+      if (!table.getSelectionModel().equals(currentModel)) {
+        soundTables.add(table);
       }
     }
     return soundTables;
   }
-
 }
