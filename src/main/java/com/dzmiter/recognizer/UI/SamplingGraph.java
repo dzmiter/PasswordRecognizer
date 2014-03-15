@@ -5,15 +5,9 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.font.FontRenderContext;
-import java.awt.font.LineBreakMeasurer;
-import java.awt.font.TextAttribute;
-import java.awt.font.TextLayout;
 import java.awt.geom.Line2D;
 import java.io.File;
 import java.io.IOException;
-import java.text.AttributedCharacterIterator;
-import java.text.AttributedString;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +17,6 @@ class SamplingGraph extends JPanel {
   private static final Font INFO_FONT = new Font("serif", Font.PLAIN, 14);
   private AudioInputStream audioInputStream;
   private String fileName;
-  private String errStr;
   private double duration;
   private List<Line2D.Double> lines;
 
@@ -36,43 +29,24 @@ class SamplingGraph extends JPanel {
     Dimension d = getSize();
     int w = d.width;
     int h = d.height;
-    int infoPad = 15;
-
+    int infoPad = 50;
     Graphics2D g2 = (Graphics2D) g;
     g2.setBackground(getBackground());
     g2.clearRect(0, 0, w, h);
-    g2.setColor(Color.white);
+    g2.setColor(new Color(240, 240, 240));
     g2.fillRect(0, h - infoPad, w, infoPad);
-
-    if (errStr != null) {
+    g2.setColor(Color.BLACK);
+    g2.setFont(INFO_FONT);
+    if (audioInputStream != null) {
+      g2.drawString("File: " + fileName + ", Length: " + String.valueOf(duration) + " sec", 3, h - infoPad + INFO_FONT.getSize());
+      AudioFormat format = audioInputStream.getFormat();
+      g2.drawString("Sample rate: " + format.getSampleRate() + " Hz, Channels: " +
+          format.getChannels(), 3, h - infoPad + 2 * INFO_FONT.getSize());
+      g2.drawString("Encoding: " + format.getEncoding() + ", Size of a sample: " +
+          format.getSampleSizeInBits() + " bit", 3, h - infoPad + 3 * INFO_FONT.getSize());
       g2.setColor(LINE_COLOR);
-      g2.setFont(new Font("serif", Font.BOLD, 18));
-      g2.drawString("ERROR", 5, 20);
-      AttributedString as = new AttributedString(errStr);
-      as.addAttribute(TextAttribute.FONT, INFO_FONT, 0, errStr.length());
-      AttributedCharacterIterator aci = as.getIterator();
-      FontRenderContext frc = g2.getFontRenderContext();
-      LineBreakMeasurer lbm = new LineBreakMeasurer(aci, frc);
-      float x = 5, y = 25;
-      lbm.setPosition(0);
-      while (lbm.getPosition() < errStr.length()) {
-        TextLayout tl = lbm.nextLayout(w - x - 5);
-        if (!tl.isLeftToRight()) {
-          x = w - tl.getAdvance();
-        }
-        tl.draw(g2, x, y += tl.getAscent());
-        y += tl.getDescent() + tl.getLeading();
-      }
-    } else {
-      g2.setColor(Color.BLACK);
-      g2.setFont(INFO_FONT);
-      g2.drawString("File: " + fileName + "  Length: " + String.valueOf(duration), 3, h - 3);
-
-      if (audioInputStream != null) {
-        g2.setColor(LINE_COLOR);
-        for (int i = 1; i < lines.size(); i++) {
-          g2.draw(lines.get(i));
-        }
+      for (int i = 1; i < lines.size(); i++) {
+        g2.draw(lines.get(i));
       }
     }
   }
@@ -80,11 +54,11 @@ class SamplingGraph extends JPanel {
   public void drawSamplingGraph(File file) {
     if (file == null || !file.isFile()) {
       lines.clear();
+      audioInputStream = null;
       repaint();
       return;
     }
     try {
-      errStr = null;
       audioInputStream = AudioSystem.getAudioInputStream(file);
       fileName = file.getName();
       long milliseconds = (long) ((audioInputStream.getFrameLength() * 1000) / audioInputStream.getFormat().getFrameRate());

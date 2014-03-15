@@ -125,7 +125,14 @@ class SoundTable extends JPanel implements ActionListener {
           tableChanged();
         }
       } else if (text.equals("Record now")) {
-        //TODO: record
+        JFrame frame = new JFrame("Record sound");
+        PlaybackMonitor playbackMonitor = new PlaybackMonitor(10);
+        frame.add(playbackMonitor);
+        frame.setSize(500, 125);
+        frame.setLocationRelativeTo(null);
+        frame.setResizable(false);
+        frame.setVisible(true);
+        playbackMonitor.start();
       } else if (text.equals("Selected")) {
         int rows[] = table.getSelectedRows();
         List<File> tmp = new ArrayList<File>();
