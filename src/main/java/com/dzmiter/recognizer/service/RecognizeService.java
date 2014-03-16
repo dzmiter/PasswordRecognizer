@@ -3,6 +3,11 @@ package com.dzmiter.recognizer.service;
 import com.mathworks.toolbox.javabuilder.MWException;
 import vText.vTextClass;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Galantis FileNet toolkit
  * Copyright (с ) 2014. All Right Reserved.
@@ -39,5 +44,25 @@ public class RecognizeService {
     } catch (MWException e) {
       e.printStackTrace();
     }
+  }
+
+  public int recognizePasswordWithConclusion(Set<File> setA, Set<File> setB) {
+    List<Integer> result = recognizePassword(setA, setB);
+    if (result.isEmpty()) return 0;
+    int conclusion = 0;
+    for (Integer i : result) {
+      conclusion += i;
+    }
+    return conclusion / result.size();
+  }
+
+  public List<Integer> recognizePassword(Set<File> setA, Set<File> setB) {
+    List<Integer> result = new ArrayList<Integer>();
+    for (File fileA : setA) {
+      for (File fileB : setB) {
+        result.add(recognizePassword(fileA.getAbsolutePath(), fileB.getAbsolutePath()));
+      }
+    }
+    return result;
   }
 }

@@ -5,6 +5,7 @@ import com.dzmiter.recognizer.domain.EmptySoundFile;
 import com.dzmiter.recognizer.domain.IndexedSet;
 import com.dzmiter.recognizer.domain.SoundFile;
 import com.dzmiter.recognizer.event.SaveAndOptimizeAction;
+import com.dzmiter.recognizer.service.RecognizeService;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -17,8 +18,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
 
 public class RecognizerFrame extends JFrame {
@@ -27,8 +27,11 @@ public class RecognizerFrame extends JFrame {
   private SamplingGraph samplingGraph;
   private SoundFile selectedSoundFile;
   private JButton playStopButton;
+  private RecognizeService recognizeService;
+  private JPanel contentPane;
 
   public RecognizerFrame() throws Exception {
+    recognizeService = new RecognizeService();
     soundTables = new ArrayList<JTable>();
     setTitle("Password Recognizer");
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -36,7 +39,7 @@ public class RecognizerFrame extends JFrame {
     setLocationRelativeTo(null);
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
-    final JPanel contentPane = new JPanel();
+    contentPane = new JPanel();
     contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
     setContentPane(contentPane);
     contentPane.setLayout(new BorderLayout());
@@ -117,7 +120,7 @@ public class RecognizerFrame extends JFrame {
     SoundTable leftSounds = new SoundTable(getListSelectionListener(), fileChooser);
     contentPane.add(BorderLayout.WEST, leftSounds);
 
-    JPanel amplitudes = buildMiddlePanel();
+    JPanel amplitudes = initMainPanel();
     contentPane.add(BorderLayout.CENTER, amplitudes);
 
     SoundTable rightSounds = new SoundTable(getListSelectionListener(), fileChooser);
@@ -148,7 +151,7 @@ public class RecognizerFrame extends JFrame {
     });
   }
 
-  private JPanel buildMiddlePanel() {
+  private JPanel initMainPanel() {
     JPanel panel = new JPanel();
     panel.setLayout(new BorderLayout());
     samplingGraph = new SamplingGraph();
@@ -167,7 +170,32 @@ public class RecognizerFrame extends JFrame {
       }
     });
     buttons.add(BorderLayout.SOUTH, playStopButton);
-    JButton compareButton = new JButton("Compare");
+    final JButton compareButton = new JButton("Compare");
+    compareButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        compareButton.setEnabled(false);
+        boolean playEnabled = playStopButton.isEnabled();
+        playStopButton.setEnabled(false);
+        JFrame preloader = PreLoader.showPreloader();
+        List<SoundTable> tables = getAllTables();
+        Set<File> setA = new HashSet<File>();
+        Set<File> setB = new HashSet<File>();
+        for (int i = 0; i < tables.size(); i++) {
+          Set<File> files = tables.get(i).getSounds();
+          if (i % 2 == 0) {
+            setA.addAll(files);
+          } else {
+            setB.addAll(files);
+          }
+        }
+        int conclusion = recognizeService.recognizePasswordWithConclusion(setA, setB);
+        preloader.dispose();
+        compareButton.setEnabled(true);
+        playStopButton.setEnabled(playEnabled);
+        JOptionPane.showMessageDialog(contentPane, "Match: " + conclusion + " %", "Conclusion", JOptionPane.INFORMATION_MESSAGE);
+      }
+    });
     buttons.add(compareButton);
     panel.add(BorderLayout.SOUTH, buttons);
     return panel;
@@ -199,6 +227,15 @@ public class RecognizerFrame extends JFrame {
         samplingGraph.drawSamplingGraph(selectedSoundFile);
       }
     };
+  }
+
+  private List<SoundTable> getAllTables() {
+    List<SoundTable> result = new ArrayList<SoundTable>();
+    for (JTable table : this.soundTables) {
+      SoundTable soundTable = (SoundTable) table.getParent().getParent().getParent();
+      result.add(soundTable);
+    }
+    return result;
   }
 
   private SoundTable getSoundTableBy(ListSelectionModel currentModel) {
