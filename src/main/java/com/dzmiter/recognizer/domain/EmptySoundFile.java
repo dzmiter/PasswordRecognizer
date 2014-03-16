@@ -3,6 +3,7 @@ package com.dzmiter.recognizer.domain;
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 
 public class EmptySoundFile extends File implements Runnable {
 
@@ -20,6 +21,22 @@ public class EmptySoundFile extends File implements Runnable {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  public static String prepareFilePath(boolean isFiltered) {
+    StringBuilder sb = new StringBuilder(System.getProperty("user.dir"));
+    sb.append(File.separator);
+    sb.append("TEMP");
+    sb.append(File.separator);
+    File file = new File(sb.toString());
+    file.mkdirs();
+    sb.append("Recording_");
+    sb.append(new Date().getTime());
+    if (isFiltered) {
+      sb.append("_filtered");
+    }
+    sb.append(".wav");
+    return sb.toString();
   }
 
   public void startRecording() {

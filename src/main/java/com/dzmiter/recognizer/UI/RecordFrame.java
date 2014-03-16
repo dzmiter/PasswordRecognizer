@@ -20,12 +20,15 @@ public class RecordFrame extends JFrame implements ActionListener {
 
   private EmptySoundFile emptySoundFile;
   private PlaybackMonitor playbackMonitor;
+  private JButton saveAndOptimize;
   private JButton okButton;
   private JButton cancelButton;
   private SaveAction saveAction;
+  private SaveAction saveAndOptimizeAction;
 
-  public RecordFrame(File file, SaveAction saveAction) {
+  public RecordFrame(File file, SaveAction saveAction, SaveAction saveAndOptimizeAction) {
     this.saveAction = saveAction;
+    this.saveAndOptimizeAction = saveAndOptimizeAction;
     emptySoundFile = new EmptySoundFile(file);
     setTitle("Record sound");
     setSize(500, 150);
@@ -37,10 +40,14 @@ public class RecordFrame extends JFrame implements ActionListener {
     playbackMonitor = new PlaybackMonitor(time, emptySoundFile);
     add(BorderLayout.CENTER, playbackMonitor);
     JPanel buttons = new JPanel();
+    saveAndOptimize = new JButton("Save and optimize");
+    saveAndOptimize.addActionListener(this);
+    saveAndOptimize.setVisible(false);
     okButton = new JButton("Start");
     okButton.addActionListener(this);
     cancelButton = new JButton("Cancel");
     cancelButton.addActionListener(this);
+    buttons.add(saveAndOptimize);
     buttons.add(okButton);
     buttons.add(cancelButton);
     add(BorderLayout.SOUTH, buttons);
@@ -63,6 +70,7 @@ public class RecordFrame extends JFrame implements ActionListener {
               okButton.setEnabled(true);
               okButton.setText("Save");
               cancelButton.setText("Cancel");
+              saveAndOptimize.setVisible(true);
             } catch (InterruptedException e1) {
               e1.printStackTrace();
             }
@@ -71,15 +79,32 @@ public class RecordFrame extends JFrame implements ActionListener {
       } else if (button.getText().equals("Stop")) {
         playbackMonitor.stop();
         okButton.setText("Save");
+        saveAndOptimize.setVisible(true);
         okButton.setEnabled(true);
         cancelButton.setText("Cancel");
       } else if (button.getText().equals("Save")) {
-        saveAction.doAction();
+        if (saveAction != null) {
+          saveAction.doAction();
+        }
         dispose();
       } else if (button.getText().equals("Cancel")) {
         emptySoundFile.delete();
         dispose();
+      } else if (button.getText().equals("Save and optimize")) {
+        JFrame preLoader = showPreLoader();
+        if (saveAndOptimizeAction != null) {
+          saveAndOptimizeAction.doAction();
+        }
+        preLoader.dispose();
+        dispose();
       }
     }
+  }
+
+  private JFrame showPreLoader() {
+    okButton.setEnabled(false);
+    saveAndOptimize.setEnabled(false);
+    cancelButton.setEnabled(false);
+    return PreLoader.showPreloader();
   }
 }

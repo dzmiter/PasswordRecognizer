@@ -1,8 +1,10 @@
 package com.dzmiter.recognizer.UI;
 
 import com.dzmiter.recognizer.domain.CustomProperties;
+import com.dzmiter.recognizer.domain.EmptySoundFile;
 import com.dzmiter.recognizer.domain.IndexedSet;
 import com.dzmiter.recognizer.domain.SoundFile;
+import com.dzmiter.recognizer.event.SaveAndOptimizeAction;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -47,6 +49,14 @@ public class RecognizerFrame extends JFrame {
 
     JMenuItem mntmRecordSound = new JMenuItem("Record sound");
     mnFile.add(mntmRecordSound);
+    mntmRecordSound.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        File fileToRecord = new File(EmptySoundFile.prepareFilePath(false));
+        RecordFrame recordFrame = new RecordFrame(fileToRecord, null, new SaveAndOptimizeAction(fileToRecord));
+        recordFrame.setVisible(true);
+      }
+    });
 
     JMenuItem mntmConfig = new JMenuItem("Config");
     mnFile.add(mntmConfig);

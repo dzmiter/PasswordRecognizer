@@ -1,8 +1,10 @@
 package com.dzmiter.recognizer.UI;
 
+import com.dzmiter.recognizer.domain.EmptySoundFile;
 import com.dzmiter.recognizer.domain.IndexedSet;
 import com.dzmiter.recognizer.domain.LinkedHashIndexedSet;
 import com.dzmiter.recognizer.event.SaveAction;
+import com.dzmiter.recognizer.event.SaveAndOptimizeAction;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
@@ -20,7 +22,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -127,8 +128,10 @@ class SoundTable extends JPanel implements ActionListener {
           tableChanged();
         }
       } else if (text.equals("Record now")) {
-        File fileToRecord = new File(prepareFilePath());
-        RecordFrame recordFrame = new RecordFrame(fileToRecord, new AddToTableAction(fileToRecord));
+        File fileToRecord = new File(EmptySoundFile.prepareFilePath(false));
+        RecordFrame recordFrame = new RecordFrame(fileToRecord,
+            new AddToTableAction(fileToRecord),
+            new AddToTableAndOptimizeAction(fileToRecord));
         recordFrame.setVisible(true);
       } else if (text.equals("Selected")) {
         int rows[] = table.getSelectedRows();
@@ -143,19 +146,6 @@ class SoundTable extends JPanel implements ActionListener {
         tableChanged();
       }
     }
-  }
-
-  private static String prepareFilePath() {
-    StringBuilder sb = new StringBuilder(System.getProperty("user.dir"));
-    sb.append(File.separator);
-    sb.append("TEMP");
-    sb.append(File.separator);
-    File file = new File(sb.toString());
-    file.mkdirs();
-    sb.append("Recording_");
-    sb.append(new Date().getTime());
-    sb.append(".wav");
-    return sb.toString();
   }
 
   public IndexedSet<File> getSounds() {
@@ -179,6 +169,19 @@ class SoundTable extends JPanel implements ActionListener {
 
     @Override
     public void doAction() {
+      sounds.add(file);
+      tableChanged();
+    }
+  }
+
+  private class AddToTableAndOptimizeAction extends SaveAndOptimizeAction {
+    public AddToTableAndOptimizeAction(File file) {
+      super(file);
+    }
+
+    @Override
+    public void doAction() {
+      File file = optimizeAndGetFile();
       sounds.add(file);
       tableChanged();
     }

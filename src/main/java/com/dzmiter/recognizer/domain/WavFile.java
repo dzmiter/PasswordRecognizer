@@ -12,7 +12,6 @@ import java.io.*;
 
 public class WavFile {
   private final static int BUFFER_SIZE = 4096;
-  ;
   private final static int FMT_CHUNK_ID = 0x20746D66;
   private final static int DATA_CHUNK_ID = 0x61746164;
   private final static int RIFF_CHUNK_ID = 0x46464952;
@@ -43,7 +42,7 @@ public class WavFile {
     buffer = new byte[BUFFER_SIZE];
   }
 
-  public static WavFile newWavFile(File file, int numChannels, long numFrames, int validBits, long sampleRate) throws IOException, Exception {
+  public static WavFile newWavFile(File file, int numChannels, long numFrames, int validBits, long sampleRate) throws Exception {
     // Instantiate new Wavfile and initialise
     WavFile wavFile = new WavFile();
     wavFile.file = file;
@@ -217,7 +216,7 @@ public class WavFile {
         // Check if we've found the format chunk,
         // If not, throw an exception as we need the format information
         // before we can read the data chunk
-        if (foundFormat == false) throw new Exception("Data chunk found before Format chunk");
+        if (!foundFormat) throw new Exception("Data chunk found before Format chunk");
 
         // Check that the chunkSize (wav data length) is a multiple of the
         // block align (bytes per frame)
