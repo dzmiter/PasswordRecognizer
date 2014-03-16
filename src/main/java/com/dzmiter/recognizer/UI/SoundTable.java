@@ -1,7 +1,8 @@
 package com.dzmiter.recognizer.UI;
 
-import com.dzmiter.recognizer.domain.LinkedHashSetWithGet;
-import com.dzmiter.recognizer.domain.SetWithGet;
+import com.dzmiter.recognizer.domain.IndexedSet;
+import com.dzmiter.recognizer.domain.LinkedHashIndexedSet;
+import com.dzmiter.recognizer.event.SaveAction;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
@@ -19,6 +20,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,13 +32,13 @@ import java.util.List;
 class SoundTable extends JPanel implements ActionListener {
 
   private TableModel dataModel;
-  private SetWithGet<File> sounds;
+  private IndexedSet<File> sounds;
   private JTable table;
   private JFileChooser fileChooser;
 
   public SoundTable(ListSelectionListener selectionListener, JFileChooser fileChooser) {
     this.fileChooser = fileChooser;
-    sounds = new LinkedHashSetWithGet<File>();
+    sounds = new LinkedHashIndexedSet<File>();
     setLayout(new BorderLayout());
     setPreferredSize(new Dimension(250, 400));
 
@@ -125,14 +127,9 @@ class SoundTable extends JPanel implements ActionListener {
           tableChanged();
         }
       } else if (text.equals("Record now")) {
-        JFrame frame = new JFrame("Record sound");
-        PlaybackMonitor playbackMonitor = new PlaybackMonitor(10);
-        frame.add(playbackMonitor);
-        frame.setSize(500, 125);
-        frame.setLocationRelativeTo(null);
-        frame.setResizable(false);
-        frame.setVisible(true);
-        playbackMonitor.start();
+        File fileToRecord = new File(prepareFilePath());
+        RecordFrame recordFrame = new RecordFrame(fileToRecord, new AddToTableAction(fileToRecord));
+        recordFrame.setVisible(true);
       } else if (text.equals("Selected")) {
         int rows[] = table.getSelectedRows();
         List<File> tmp = new ArrayList<File>();
@@ -148,7 +145,20 @@ class SoundTable extends JPanel implements ActionListener {
     }
   }
 
-  public SetWithGet<File> getSounds() {
+  private static String prepareFilePath() {
+    StringBuilder sb = new StringBuilder(System.getProperty("user.dir"));
+    sb.append(File.separator);
+    sb.append("TEMP");
+    sb.append(File.separator);
+    File file = new File(sb.toString());
+    file.mkdirs();
+    sb.append("Recording_");
+    sb.append(new Date().getTime());
+    sb.append(".wav");
+    return sb.toString();
+  }
+
+  public IndexedSet<File> getSounds() {
     return sounds;
   }
 
@@ -158,5 +168,19 @@ class SoundTable extends JPanel implements ActionListener {
 
   public void tableChanged() {
     table.tableChanged(new TableModelEvent(dataModel));
+  }
+
+  private class AddToTableAction implements SaveAction {
+    private File file;
+
+    public AddToTableAction(File file) {
+      this.file = file;
+    }
+
+    @Override
+    public void doAction() {
+      sounds.add(file);
+      tableChanged();
+    }
   }
 }

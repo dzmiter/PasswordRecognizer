@@ -8,6 +8,6 @@ import java.util.Set;
  *
  * @author dbezugly
  */
-public interface SetWithGet<E> extends Set<E> {
+public interface IndexedSet<E> extends Set<E> {
   public E get(int number);
 }

@@ -9,7 +9,7 @@ import java.util.LinkedHashSet;
  *
  * @author dbezugly
  */
-public class LinkedHashSetWithGet<E> extends LinkedHashSet<E> implements SetWithGet<E> {
+public class LinkedHashIndexedSet<E> extends LinkedHashSet<E> implements IndexedSet<E> {
   public E get(int number) {
     Iterator iterator = iterator();
     int index = 0;

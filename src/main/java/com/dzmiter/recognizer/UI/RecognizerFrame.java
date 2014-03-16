@@ -1,7 +1,7 @@
 package com.dzmiter.recognizer.UI;
 
 import com.dzmiter.recognizer.domain.CustomProperties;
-import com.dzmiter.recognizer.domain.SetWithGet;
+import com.dzmiter.recognizer.domain.IndexedSet;
 import com.dzmiter.recognizer.domain.SoundFile;
 
 import javax.swing.*;
@@ -178,7 +178,7 @@ public class RecognizerFrame extends JFrame {
         int index = current.getMinSelectionIndex();
         playStopButton.setEnabled(index >= 0);
         SoundTable currentPane = getSoundTableBy(current);
-        SetWithGet<File> sounds = currentPane.getSounds();
+        IndexedSet<File> sounds = currentPane.getSounds();
         if (selectedSoundFile != null) selectedSoundFile.stop();
         if (index >= 0) {
           File currentFile = sounds.get(index);
