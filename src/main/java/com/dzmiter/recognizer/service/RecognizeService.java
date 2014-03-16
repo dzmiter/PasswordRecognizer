@@ -1,5 +1,6 @@
 package com.dzmiter.recognizer.service;
 
+import com.dzmiter.recognizer.domain.CustomProperties;
 import com.mathworks.toolbox.javabuilder.MWException;
 import vText.vTextClass;
 
@@ -16,12 +17,15 @@ import java.util.Set;
  */
 public class RecognizeService {
 
-  private static final String MIN_THRESHOLD = "0.5";
-  private static final String MAX_THRESHOLD = "1.5";
+  private String minThreshold;
+  private String maxThreshold;
   private vTextClass vText;
 
   public RecognizeService() {
     try {
+      CustomProperties properties = new CustomProperties("recognize.properties");
+      minThreshold = properties.getProperty("minThreshold");
+      maxThreshold = properties.getProperty("maxThreshold");
       vText = new vTextClass();
     } catch (MWException e) {
       e.printStackTrace();
@@ -30,11 +34,11 @@ public class RecognizeService {
 
   public int recognizePassword(String sourcePath, String comparePath) {
     try {
-      Object[] result = vText.recognizePartial(1, sourcePath, comparePath, MIN_THRESHOLD, MAX_THRESHOLD);
+      Object[] result = vText.recognize(1, sourcePath, comparePath, minThreshold, maxThreshold);
       return Integer.parseInt(result[0].toString());
     } catch (Exception e) {
       e.printStackTrace();
-      return 0;
+      return -1;
     }
   }
 
@@ -48,10 +52,10 @@ public class RecognizeService {
 
   public int recognizePasswordWithConclusion(Set<File> setA, Set<File> setB) {
     List<Integer> result = recognizePassword(setA, setB);
-    if (result.isEmpty()) return 0;
+    if (result.isEmpty()) return -1;
     int conclusion = 0;
     for (Integer i : result) {
-      conclusion += i;
+      if (i > 0) conclusion += i;
     }
     return conclusion / result.size();
   }
