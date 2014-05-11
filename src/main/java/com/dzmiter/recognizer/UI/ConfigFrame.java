@@ -83,7 +83,9 @@ public class ConfigFrame extends JFrame {
       public void actionPerformed(ActionEvent e) {
         properties.setProperty("minThreshold", minThreshold.getText());
         properties.setProperty("maxThreshold", maxThreshold.getText());
-        try (OutputStream out = new FileOutputStream("recognize.properties")) {
+        OutputStream out;
+        try {
+          out = new FileOutputStream("recognize.properties");
           properties.store(out, null);
           out.close();
         } catch (IOException ex) {
