@@ -31,6 +31,7 @@ public class RecordFrame extends JFrame implements ActionListener {
     this.saveAndOptimizeAction = saveAndOptimizeAction;
     emptySoundFile = new EmptySoundFile(file);
     setTitle("Record sound");
+    setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/microphone.png")));
     setSize(500, 150);
     setLocationRelativeTo(null);
     setResizable(false);

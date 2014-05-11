@@ -34,8 +34,10 @@ public class RecognizerFrame extends JFrame {
     recognizeService = new RecognizeService();
     soundTables = new ArrayList<JTable>();
     setTitle("Password Recognizer");
+    setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/microphone.png")));
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    setMinimumSize(new Dimension(1000, 600));
+    setMinimumSize(new Dimension(640, 480));
+    setSize(new Dimension(1000, 600));
     setLocationRelativeTo(null);
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
@@ -62,10 +64,17 @@ public class RecognizerFrame extends JFrame {
     });
 
     JMenuItem mntmConfig = new JMenuItem("Config");
+    mntmConfig.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        ConfigFrame configFrame = new ConfigFrame();
+        configFrame.setVisible(true);
+      }
+    });
     mnFile.add(mntmConfig);
 
-    JMenuItem mntmSearch = new JMenuItem("Search");
-    mnFile.add(mntmSearch);
+//    JMenuItem mntmSearch = new JMenuItem("Search");
+//    mnFile.add(mntmSearch);
 
     JMenuItem mntmExit = new JMenuItem("Exit");
     mntmExit.addActionListener(new ActionListener() {
@@ -79,20 +88,23 @@ public class RecognizerFrame extends JFrame {
     JMenu mnHelp = new JMenu("Help");
     menuBar.add(mnHelp);
 
-    JMenuItem mntmHelp = new JMenuItem("Help");
+    /*JMenuItem mntmHelp = new JMenuItem("Help");
     mntmHelp.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
         JOptionPane.showMessageDialog(contentPane, "Help text!", "Help", JOptionPane.INFORMATION_MESSAGE);
       }
     });
-    mnHelp.add(mntmHelp);
+    mnHelp.add(mntmHelp);*/
 
     JMenuItem mntmAbout = new JMenuItem("About");
+    final CustomProperties commonProperties = new CustomProperties("common.properties");
     mntmAbout.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        JOptionPane.showMessageDialog(contentPane, "This is password recognizer", "About", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(contentPane,
+            commonProperties.getProperty("copyright"),
+            "About", JOptionPane.INFORMATION_MESSAGE);
       }
     });
     mnHelp.add(mntmAbout);
@@ -142,7 +154,9 @@ public class RecognizerFrame extends JFrame {
     EventQueue.invokeLater(new Runnable() {
       public void run() {
         try {
+          JFrame preloader = PreLoader.showPreloader();
           RecognizerFrame frame = new RecognizerFrame();
+          preloader.dispose();
           frame.setVisible(true);
         } catch (Exception e) {
           e.printStackTrace();
@@ -189,6 +203,7 @@ public class RecognizerFrame extends JFrame {
             setB.addAll(files);
           }
         }
+        recognizeService.refreshProperties();
         int conclusion = recognizeService.recognizePasswordWithConclusion(setA, setB);
         preloader.dispose();
         compareButton.setEnabled(true);

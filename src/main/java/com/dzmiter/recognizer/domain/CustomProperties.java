@@ -1,6 +1,9 @@
 package com.dzmiter.recognizer.domain;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 /**
@@ -13,7 +16,14 @@ public class CustomProperties extends Properties {
   public CustomProperties(String propertiesFileName) {
     defaults = new Properties();
     try {
-      defaults.load(getClass().getClassLoader().getResourceAsStream(propertiesFileName));
+      InputStream stream;
+      try {
+        stream = new FileInputStream(propertiesFileName);
+      } catch (FileNotFoundException fnEx) {
+        stream = getClass().getClassLoader().getResourceAsStream(propertiesFileName);
+      }
+      defaults.load(stream);
+      stream.close();
     } catch (IOException e) {
       e.printStackTrace();
     }

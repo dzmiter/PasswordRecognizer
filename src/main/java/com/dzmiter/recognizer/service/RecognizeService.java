@@ -69,4 +69,10 @@ public class RecognizeService {
     }
     return result;
   }
+
+  public void refreshProperties() {
+    CustomProperties properties = new CustomProperties("recognize.properties");
+    minThreshold = properties.getProperty("minThreshold");
+    maxThreshold = properties.getProperty("maxThreshold");
+  }
 }
