@@ -19,9 +19,9 @@ import java.io.OutputStream;
  */
 public class ConfigFrame extends JFrame {
 
-  CustomProperties properties;
-  JTextField minThreshold;
-  JTextField maxThreshold;
+  private CustomProperties properties;
+  private JTextField minThreshold;
+  private JTextField maxThreshold;
 
   public ConfigFrame() {
     properties = new CustomProperties("recognize.properties");
@@ -83,6 +83,7 @@ public class ConfigFrame extends JFrame {
       public void actionPerformed(ActionEvent e) {
         properties.setProperty("minThreshold", minThreshold.getText());
         properties.setProperty("maxThreshold", maxThreshold.getText());
+        properties.setProperty("maxFramesCount", properties.getProperty("maxFramesCount"));
         OutputStream out;
         try {
           out = new FileOutputStream("recognize.properties");
